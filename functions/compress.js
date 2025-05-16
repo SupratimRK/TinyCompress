@@ -1,21 +1,39 @@
 const tinify = require('tinify');
 const { Buffer } = require('buffer');
 
+// Define allowed origins
+const ALLOWED_ORIGINS = [
+  'https://tiny.toolhub.live',
+  'http://localhost:8888' // Specifically allow localhost on port 8888
+];
+
 // Handler for the compress image function
 exports.handler = async function(event, context) {
-  // Set CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+  const requestOrigin = event.headers.origin;
   
+  // Initialize response headers
+  const responseHeaders = {
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS', // Important for preflight
+  };
+
+  // Dynamically set Access-Control-Allow-Origin
+  if (requestOrigin) {
+    if (ALLOWED_ORIGINS.includes(requestOrigin)) { // Simplified check
+      responseHeaders['Access-Control-Allow-Origin'] = requestOrigin;
+    }
+    // If origin is not in ALLOWED_ORIGINS,
+    // 'Access-Control-Allow-Origin' will not be set.
+    // The browser will then block the cross-origin request.
+  }
+  // If no requestOrigin (e.g. same-origin, curl), ACAO is not set, which is fine.
+
   // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
-      headers,
-      body: ''
+      statusCode: 204, // 204 No Content is standard for successful preflights
+      headers: responseHeaders, // Send the determined headers
+      body: '' // Body must be empty for 204
     };
   }
   
@@ -24,7 +42,7 @@ exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
-        headers,
+        headers: responseHeaders, // Use determined headers
         body: JSON.stringify({ error: 'Method Not Allowed' })
       };
     }
@@ -39,7 +57,7 @@ exports.handler = async function(event, context) {
     if (!apiKey) {
       return {
         statusCode: 400,
-        headers,
+        headers: responseHeaders, // Use determined headers
         body: JSON.stringify({ error: 'TinyPNG API key is not configured on the server' })
       };
     }
@@ -47,7 +65,7 @@ exports.handler = async function(event, context) {
     if (!imageData) {
       return {
         statusCode: 400,
-        headers,
+        headers: responseHeaders, // Use determined headers
         body: JSON.stringify({ error: 'Image data is required' })
       };
     }
@@ -160,7 +178,7 @@ exports.handler = async function(event, context) {
       // Return success response
       return {
         statusCode: 200,
-        headers,
+        headers: responseHeaders, // Use determined headers
         body: JSON.stringify({
           ...result,
           compressionsThisMonth,
@@ -182,7 +200,7 @@ exports.handler = async function(event, context) {
       
       return {
         statusCode: 401,
-        headers,
+        headers: responseHeaders, // Use determined headers
         body: JSON.stringify({ 
           error: errorMessage,
           details: validateError.message
@@ -197,21 +215,26 @@ exports.handler = async function(event, context) {
     let errorMessage = 'Internal Server Error';
     let statusCode = 500;
     
-    if (!error.message && !apiKey) {
+    if (error instanceof SyntaxError && error.message.toLowerCase().includes('json')) {
+      errorMessage = 'Invalid JSON in request body. Please ensure the request body is correctly formatted.';
+      statusCode = 400; // Bad Request
+    } else if (!process.env.TINYPNG_API_KEY) { // Check moved here for clarity, though ideally caught earlier
       errorMessage = 'TinyPNG API key is missing. Please set it in your environment variables.';
-      statusCode = 400;
+      statusCode = 400; // Bad Request or 500 if server config issue
     } else if (error.message && error.message.includes('NetworkError')) {
       errorMessage = 'Network error when contacting TinyPNG API. Please check your internet connection.';
+      // statusCode remains 500 as it's an issue on the server's side to connect externally
     } else if (error.message && error.message.toLowerCase().includes('memory')) {
       errorMessage = 'The image is too large to process. Please try with a smaller image.';
+      statusCode = 413; // Payload Too Large
     }
     
     return {
       statusCode: statusCode,
-      headers,
+      headers: responseHeaders, // Use determined headers
       body: JSON.stringify({ 
         error: errorMessage,
-        details: error.message
+        details: error.message // It's good practice to not expose raw error messages in production
       })
     };
   }
