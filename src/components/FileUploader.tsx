@@ -22,7 +22,7 @@ const defaultAcceptedFileTypes: Accept = {
 
 const FileUploader: React.FC<DropzoneProps> = ({
   onDrop,
-  maxFiles = 10,
+  maxFiles = 1, // Changed default to 1 for single image upload
   acceptedFileTypes = defaultAcceptedFileTypes,
   className = '',
   uploadedFiles = []
@@ -36,10 +36,11 @@ const FileUploader: React.FC<DropzoneProps> = ({
   }, [uploadedFiles]);
     const { getRootProps, getInputProps, open } = useDropzone({
     accept: acceptedFileTypes,
-    maxFiles,
+    maxFiles: 1, // Enforce single file upload
     onDrop: (acceptedFiles) => {
       setIsDragActive(false);
-      onDrop(acceptedFiles);
+      // Only pass the first file if multiple are somehow selected
+      onDrop(acceptedFiles.slice(0, 1));
     },
     onDragEnter: () => setIsDragActive(true),
     onDragLeave: () => setIsDragActive(false),
@@ -63,8 +64,7 @@ const FileUploader: React.FC<DropzoneProps> = ({
             : 'border-gray-300 bg-gray-50'
       } ${className}`}
     >
-      <input {...getInputProps()} />
-      <input 
+      <input {...getInputProps()} />      <input 
         id="file-input"
         type="file" 
         multiple 
@@ -73,6 +73,8 @@ const FileUploader: React.FC<DropzoneProps> = ({
         onChange={(e) => {
           if (e.target.files) {
             onDrop(Array.from(e.target.files));
+            // Reset the file input value to allow selecting the same file again
+            e.target.value = '';
           }
         }}
       />
@@ -101,9 +103,8 @@ const FileUploader: React.FC<DropzoneProps> = ({
               <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12" 
                   style={{ backgroundSize: '200% 100%', animationDuration: '2s' }} />
             </div>
-          </motion.div><div>              <div className="relative overflow-hidden inline-block mb-2">
-                <p className="text-xl font-medium text-primary relative z-10">
-                  {isDragActive ? 'Drop images here' : 'Click to upload images'}
+          </motion.div><div>              <div className="relative overflow-hidden inline-block mb-2">                <p className="text-xl font-medium text-primary relative z-10">
+                  {isDragActive ? 'Drop image here' : 'Click to upload image'}
                 </p>
                 <div className="absolute inset-0 z-0">
                   <div className="animate-shimmer-slow absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent -skew-x-12" 
@@ -111,7 +112,7 @@ const FileUploader: React.FC<DropzoneProps> = ({
                 </div>
               </div>
               <p className="text-sm text-gray-500 mb-1">
-                Drag & drop files or click anywhere in this area
+                Drag & drop an image or click anywhere in this area
               </p>
               <p className="text-xs text-gray-400">
                 Supports: JPEG, PNG, WebP, AVIF

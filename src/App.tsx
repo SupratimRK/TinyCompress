@@ -13,6 +13,7 @@ import CompressionControls from './components/CompressionControls';
 import CompressionStats from './components/CompressionStats';
 import ConversionParameters from './components/ConversionParameters';
 import UploadInstructions from './components/UploadInstructions';
+import Footer from './components/Footer';
 
 // Hooks and services
 import { useImageFiles } from './hooks/useImageFiles';
@@ -81,18 +82,14 @@ function App() {
     
     initializeService();
   }, []);
-  
-  // Handle image upload
+    // Handle image upload - now just replaces any existing image
   const handleFileDrop = (files: File[]) => {
-    addImages(files);
+    // Clear existing images and results
+    clearImages();
+    setCompressionResults([]);
     
-    // Reset compression results for these new images
-    setCompressionResults((prev) => 
-      prev.filter((result) => 
-        // Keep results for images that still exist in the updated images array
-        images.some((img) => img.id === result.original.id)
-      )
-    );
+    // Add the new single image
+    addImages(files);
   };
   
   // Handle image removal
@@ -267,11 +264,10 @@ function App() {
                     </div>
                   )}
                   
-                  {/* Image Count Overlay */}
-                  <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100">
+                  {/* Image Count Overlay */}                  <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100">
                     <div className="flex items-center">
                       <IconImage className="text-primary mr-2 w-5 h-5" />
-                      <span className="text-sm font-medium">{images.length} {images.length === 1 ? 'Image' : 'Images'}</span>
+                      <span className="text-sm font-medium">Image Ready</span>
                     </div>
                   </div>
                   
@@ -358,10 +354,10 @@ function App() {
                   ))}
                 </div>
               </AnimatePresence>
-            </>
-          )}
+            </>          )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
