@@ -5,9 +5,8 @@ import { IconHeart } from '../react-icons-fix';
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
-  return (
-    <motion.footer 
-      className="w-full py-6 mt-10 border-t border-gray-100"
+  return (    <motion.footer 
+      className="w-full py-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, delay: 0.2 }}

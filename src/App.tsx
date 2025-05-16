@@ -355,8 +355,8 @@ function App() {
                 </div>
               </AnimatePresence>
             </>          )}
-        </div>
-      </div>
+        </div>      </div>
+      <div className="border-t border-gray-100 mt-10"></div>
       <Footer />
     </div>
   );

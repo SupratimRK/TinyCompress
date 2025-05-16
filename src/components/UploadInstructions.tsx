@@ -43,13 +43,33 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
         </div>
         
         {/* Buttons in same line - main actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 border-b border-gray-100 pb-3">
-          <motion.button 
-            onClick={onUploadClick}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 border-b border-gray-100 pb-3">          <motion.button 
+            onClick={(e) => {
+              // Create a new file input element to replace the existing one
+              const oldInput = document.getElementById('file-input');
+              if (oldInput) {
+                const newInput = document.createElement('input');
+                newInput.id = 'file-input';
+                newInput.type = 'file';
+                newInput.className = 'hidden';
+                newInput.accept = 'image/jpeg,image/png,image/webp,image/avif';
+                
+                // Copy the event handler
+                newInput.onchange = oldInput.onchange;
+                
+                // Replace the old input with the new one
+                oldInput.parentNode?.replaceChild(newInput, oldInput);
+                
+                // Click the new input
+                newInput.click();
+              } else {
+                onUploadClick();
+              }
+            }}
             className="w-full px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium inline-flex items-center justify-center shadow-sm relative overflow-hidden"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-          >            <span className="relative z-10 flex items-center">
+          ><span className="relative z-10 flex items-center">
               <IconUpload className="mr-2 w-4 h-4" />
               Upload Image
             </span>{!hasImages && (
