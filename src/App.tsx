@@ -48,11 +48,7 @@ function App() {
   
   // State for images
   const { images, addImages, removeImage, clearImages } = useImageFiles();
-  const [compressionResults, setCompressionResults] = useState<CompressionResult[]>([]);
-  const [isCompressing, setIsCompressing] = useState<boolean>(false);
-  
-  // Toggle for showing compressed vs original images
-  const [showCompressed, toggleShowCompressed] = useToggle(true);
+  const [compressionResults, setCompressionResults] = useState<CompressionResult[]>([]);  const [isCompressing, setIsCompressing] = useState<boolean>(false);
   
   // Initialize theme and TinyPNG service on component mount
   useEffect(() => {
@@ -261,9 +257,8 @@ function App() {
                 {/* Image Preview Area */}
                 <div className="p-6 relative">
                   {mainPreviewImage && (
-                    <div className="aspect-auto max-h-[400px] flex justify-center items-center">
-                      <img 
-                        src={showCompressed && mainPreviewResult?.status === CompressionStatus.SUCCESS
+                    <div className="aspect-auto max-h-[400px] flex justify-center items-center">                      <img 
+                        src={mainPreviewResult?.status === CompressionStatus.SUCCESS
                           ? mainPreviewResult.compressed.url 
                           : mainPreviewImage.preview}
                         alt="Preview"
@@ -329,28 +324,7 @@ function App() {
             hasImages={images.length > 0}
             hasCompressedImages={hasCompressedImages}
           />
-          
-          {/* Toggle View Button - Only show when images are uploaded */}
-          {images.length > 0 && (
-            <motion.div
-              className="mb-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <button
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all 
-                    ${showCompressed 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'bg-gray-100 text-gray-700'}`}
-                  onClick={toggleShowCompressed}
-                >
-                  {showCompressed ? 'View Original' : 'View Compressed'}
-                </button>
-              </div>
-            </motion.div>
-          )}
+            {/* Toggle View Button has been removed */}
           
           {images.length > 0 && (
             <>
@@ -375,13 +349,11 @@ function App() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                   {images.map((image) => (
                     <ImagePreview
-                      key={image.id}
-                      image={image}
+                      key={image.id}                      image={image}
                       result={compressionResults.find(
                         (result) => result.original.id === image.id
                       )}
                       onRemove={handleRemoveImage}
-                      showCompressed={showCompressed}
                     />
                   ))}
                 </div>

@@ -8,20 +8,17 @@ interface ImagePreviewProps {
   image: ImageFile;
   result?: CompressionResult;
   onRemove: (id: string) => void;
-  showCompressed?: boolean;
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({
   image,
   result,
-  onRemove,
-  showCompressed = false
+  onRemove
 }) => {
   const isCompressed = result && result.status === CompressionStatus.SUCCESS;
   const isLoading = result && result.status === CompressionStatus.LOADING;
   const isError = result && result.status === CompressionStatus.ERROR;
-  
-  const displayImage = showCompressed && isCompressed
+    const displayImage = isCompressed
     ? { src: result.compressed.url } 
     : { src: image.preview };
   

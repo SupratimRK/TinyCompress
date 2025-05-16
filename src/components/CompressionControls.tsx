@@ -10,8 +10,6 @@ interface CompressionControlsProps {
   isCompressing: boolean;
   hasCompressedImages: boolean;
   hasSelectedImages: boolean;
-  showCompressed: boolean;
-  onToggleView: () => void;
 }
 
 const CompressionControls: React.FC<CompressionControlsProps> = ({
@@ -20,10 +18,8 @@ const CompressionControls: React.FC<CompressionControlsProps> = ({
   onDownloadAll,
   isCompressing,
   hasCompressedImages,
-  hasSelectedImages,
-  showCompressed,
-  onToggleView
-}) => {  return (
+  hasSelectedImages
+}) => {return (
     <motion.div 
       className="mb-8"
       initial={{ opacity: 0 }}
@@ -48,7 +44,12 @@ const CompressionControls: React.FC<CompressionControlsProps> = ({
                     Compressing...
                   </>
                 ) : (
-                  'Compress Images'
+                  <>
+                    <svg className="mr-2 w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 14V20M19 20H13M19 20L13 14M5 10V4M5 4H11M5 4L11 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Compress Images
+                  </>
                 )}
               </motion.button>
 
@@ -65,8 +66,7 @@ const CompressionControls: React.FC<CompressionControlsProps> = ({
 
             <div className="flex flex-wrap gap-2 items-center">
               {hasCompressedImages && (
-                <>
-                  <motion.button
+                <>                  <motion.button
                     className="px-4 py-2.5 rounded-lg text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 inline-flex items-center"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -74,36 +74,6 @@ const CompressionControls: React.FC<CompressionControlsProps> = ({
                   >
                     <IconDownload className="mr-1.5" /> Download All
                   </motion.button>
-                  
-                  <motion.div
-                    className="flex bg-gray-100 p-1 rounded-lg"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <motion.button
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        !showCompressed ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600'
-                      }`}
-                      whileHover={!showCompressed ? {} : { scale: 1.02 }}
-                      whileTap={!showCompressed ? {} : { scale: 0.98 }}
-                      onClick={onToggleView}
-                      disabled={!showCompressed}
-                    >
-                      Original
-                    </motion.button>
-                    <motion.button
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        showCompressed ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600'
-                      }`}
-                      whileHover={showCompressed ? {} : { scale: 1.02 }}
-                      whileTap={showCompressed ? {} : { scale: 0.98 }}
-                      onClick={onToggleView}
-                      disabled={showCompressed}
-                    >
-                      Compressed
-                    </motion.button>
-                  </motion.div>
                 </>
               )}
             </div>
