@@ -64,26 +64,7 @@ const FileUploader: React.FC<DropzoneProps> = ({
             : 'border-gray-300 bg-gray-50'
       } ${className}`}
     >
-      <input {...getInputProps()} />      <input 
-        id="file-input"
-        type="file" 
-        multiple={false} 
-        accept="image/jpeg,image/png,image/webp,image/avif"
-        className="hidden"
-        onChange={(e) => {
-          if (e.target.files && e.target.files.length > 0) {
-            // Process the files
-            onDrop(Array.from(e.target.files));
-            
-            // Use a timeout to reset the value to prevent double-firing
-            setTimeout(() => {
-              if (e.target) {
-                e.target.value = '';
-              }
-            }, 100);
-          }
-        }}
-      />
+      <input {...getInputProps()} />
       
       {!hasFiles ? (
         <motion.div 
