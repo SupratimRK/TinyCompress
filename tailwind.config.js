@@ -20,6 +20,7 @@ module.exports = {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'shimmer': 'shimmer 2s infinite linear',
+        'shimmer-slow': 'shimmer 3s infinite linear',
       },
       keyframes: {
         shimmer: {

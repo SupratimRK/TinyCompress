@@ -28,16 +28,12 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="p-4">        {/* Upload instructions */}
-        <div className="flex flex-col sm:flex-row items-center mb-5 border-b border-gray-100 pb-4">
-          <div className="flex items-center mb-3 sm:mb-0 sm:mr-auto">
-            <div className="w-14 h-14 rounded-full bg-white border-2 border-primary/30 flex items-center justify-center mr-4 relative overflow-hidden shadow-md shadow-primary/10">
-              <div className="w-11 h-11 flex items-center justify-center rounded-full bg-primary/10 relative overflow-hidden">
-                <IconUpload className="text-primary text-2xl relative z-10" />
-                <div className="absolute inset-0 z-0">
-                  <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12" 
-                      style={{ backgroundSize: '200% 100%' }} />
-                </div>
+      <div className="p-4">
+        {/* Upload instructions */}        <div className="mb-5 border-b border-gray-100 pb-4">
+          <div className="flex items-center mb-2">
+            <div className="mr-3">
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary">
+                <IconUpload className="text-white text-xl" />
               </div>
             </div>
             <div>
@@ -46,20 +42,28 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
             </div>
           </div>
         </div>
-          {/* Buttons in same line - main actions */}
-        <div className="flex flex-wrap gap-3 mb-3 border-b border-gray-100 pb-3">
+        
+        {/* Buttons in same line - main actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 border-b border-gray-100 pb-3">
           <motion.button 
             onClick={onUploadClick}
-            className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium inline-flex items-center shadow-sm"
+            className="w-full px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium inline-flex items-center justify-center shadow-sm relative overflow-hidden"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <IconUpload className="mr-2 w-4 h-4" />
-            Upload Images
+            <span className="relative z-10 flex items-center">
+              <IconUpload className="mr-2 w-4 h-4" />
+              Upload Images
+            </span>            {!hasImages && (
+              <div className="absolute inset-0 z-0">
+                <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12" 
+                    style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }} />
+              </div>
+            )}
           </motion.button>
           
           <motion.button
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium inline-flex items-center shadow-sm
+            className={`w-full px-5 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center shadow-sm
               ${!isCompressing && hasImages
                 ? 'bg-primary text-white shadow-md shadow-primary/20' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
@@ -67,12 +71,27 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
             whileTap={!isCompressing && hasImages ? { scale: 0.98 } : {}}
             onClick={hasImages ? onCompressClick : undefined}
             disabled={!hasImages || isCompressing}
-          >
-            {isCompressing ? 'Compressing...' : 'Compress Images'}
+          >            {isCompressing ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Compressing...
+              </span>
+            ) : (
+              <>                <svg className="mr-2 w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 14L14 14L14 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 10L10 10L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M14 14L10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Compress Images
+              </>
+            )}
           </motion.button>
           
           <motion.button
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium inline-flex items-center shadow-sm
+            className={`w-full px-5 py-2.5 rounded-lg text-sm font-medium inline-flex items-center justify-center shadow-sm
               ${hasCompressedImages
                 ? 'bg-green-600 hover:bg-green-700 text-white' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
@@ -85,10 +104,10 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
             Download All
           </motion.button>
         </div>
-        
-        {/* Clear all on a separate line */}
-        <div className="flex justify-end pt-1">          <motion.button
-            className={`px-5 py-2 rounded-lg text-sm font-medium shadow-sm
+          {/* Clear all on a separate line - full width on mobile, right-aligned on desktop */}
+        <div className="pt-1 w-full flex justify-end">
+          <motion.button
+            className={`w-full sm:w-auto px-5 py-2 rounded-lg text-sm font-medium shadow-sm
               ${hasImages
                 ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
@@ -103,6 +122,6 @@ const UploadInstructions: React.FC<UploadInstructionsProps> = ({
       </div>
     </motion.div>
   );
-}
+};
 
 export default UploadInstructions;

@@ -91,30 +91,32 @@ const FileUploader: React.FC<DropzoneProps> = ({
             damping: 10 
           }}
         >          <motion.div
-            className="w-24 h-24 flex items-center justify-center rounded-full bg-white border-2 border-primary/30 mb-4 relative overflow-hidden shadow-lg shadow-primary/10"
+            className="w-24 h-24 flex items-center justify-center rounded-full bg-primary mb-4 relative overflow-hidden"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="w-20 h-20 flex items-center justify-center rounded-full bg-primary/10 relative overflow-hidden">
-              <IconUpload className="text-primary text-4xl relative z-10" />
-              {/* Shimmer animation */}
-              <div className="absolute inset-0 z-0">
-                <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12" 
-                     style={{ backgroundSize: '200% 100%' }} />
-              </div>
+            <IconUpload className="text-white text-4xl relative z-10" />
+            {/* Shimmer animation */}
+            <div className="absolute inset-0 z-0">
+              <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12" 
+                  style={{ backgroundSize: '200% 100%', animationDuration: '2s' }} />
             </div>
-          </motion.div>
-          <div>
-            <p className="text-xl font-medium mb-2 text-primary">
-              {isDragActive ? 'Drop images here' : 'Click to upload images'}
-            </p>
-            <p className="text-sm text-gray-500 mb-1">
-              Drag & drop files or click anywhere in this area
-            </p>
-            <p className="text-xs text-gray-400">
-              Supports: JPEG, PNG, WebP, AVIF
-            </p>
-          </div>
+          </motion.div><div>              <div className="relative overflow-hidden inline-block mb-2">
+                <p className="text-xl font-medium text-primary relative z-10">
+                  {isDragActive ? 'Drop images here' : 'Click to upload images'}
+                </p>
+                <div className="absolute inset-0 z-0">
+                  <div className="animate-shimmer-slow absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent -skew-x-12" 
+                      style={{ backgroundSize: '200% 100%' }} />
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mb-1">
+                Drag & drop files or click anywhere in this area
+              </p>
+              <p className="text-xs text-gray-400">
+                Supports: JPEG, PNG, WebP, AVIF
+              </p>
+            </div>
         </motion.div>
       ) : (        <div className="w-full">
           <div className="flex items-center justify-between mb-4">
@@ -123,7 +125,7 @@ const FileUploader: React.FC<DropzoneProps> = ({
               <h3 className="text-lg font-medium">{uploadedFiles.length} {uploadedFiles.length === 1 ? 'Image' : 'Images'} Selected</h3>
             </div>
             <div className="flex items-center gap-2">              <motion.button
-                className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm flex items-center"
+                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm flex items-center shadow-sm"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={(e) => {
@@ -131,10 +133,10 @@ const FileUploader: React.FC<DropzoneProps> = ({
                   open();
                 }}
               >
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-1.5 relative overflow-hidden">
-                  <IconUpload className="text-primary text-sm relative z-10" />
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-1.5 relative overflow-hidden">
+                  <IconUpload className="text-white text-sm relative z-10" />
                   <div className="absolute inset-0 z-0">
-                    <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12" 
+                    <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12" 
                          style={{ backgroundSize: '200% 100%' }} />
                   </div>
                 </div>
