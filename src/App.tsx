@@ -1,24 +1,437 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { IconInfo, IconHeart, IconImage, IconUpload, IconDownload } from './react-icons-fix';
+import { getRandomTheme, applyTheme } from './utils/theme';
 import './App.css';
 
+// Components
+import Header from './components/Header';
+import FileUploader from './components/FileUploader';
+import ImagePreview from './components/ImagePreview';
+import CompressionOptions from './components/CompressionOptions';
+import CompressionControls from './components/CompressionControls';
+import CompressionStats from './components/CompressionStats';
+import ConversionParameters from './components/ConversionParameters';
+
+// Hooks and services
+import { useImageFiles } from './hooks/useImageFiles';
+import { useToggle } from './hooks/useToggle';
+import TinyPngService, { SIZE_PRESETS } from './services/tinypngService';
+
+// Types
+import { SizeOption, CompressionResult, CompressionStatus } from './types';
+
+const sizeOptions: SizeOption[] = [
+  { id: 'tiny', label: '20 KB', value: SIZE_PRESETS.TINY },
+  { id: 'small', label: '50 KB', value: SIZE_PRESETS.SMALL },
+  { id: 'medium', label: '100 KB', value: SIZE_PRESETS.MEDIUM },
+  { id: 'regular', label: '150 KB', value: SIZE_PRESETS.REGULAR },
+  { id: 'large', label: '250 KB', value: SIZE_PRESETS.LARGE },
+  { id: 'xlarge', label: '500 KB', value: SIZE_PRESETS.EXTRA_LARGE },
+];
+
 function App() {
+  // State for service connection
+  const [serviceConnected, setServiceConnected] = useState<boolean>(false);
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const [service, setService] = useState<TinyPngService | null>(null);
+  
+  // State for compression options
+  const [selectedSizeOption, setSelectedSizeOption] = useState<SizeOption | null>(
+    sizeOptions[3] // Default to 150KB
+  );
+  
+  // State for conversion parameters
+  const [selectedFormat, setSelectedFormat] = useState<string>('same');
+  const [quality, setQuality] = useState<number>(75);
+  
+  // State for images
+  const { images, addImages, removeImage, clearImages } = useImageFiles();
+  const [compressionResults, setCompressionResults] = useState<CompressionResult[]>([]);
+  const [isCompressing, setIsCompressing] = useState<boolean>(false);
+  
+  // Toggle for showing compressed vs original images
+  const [showCompressed, toggleShowCompressed] = useToggle(true);
+  
+  // Initialize theme and TinyPNG service on component mount
+  useEffect(() => {
+    // Apply random theme
+    const selectedTheme = getRandomTheme();
+    applyTheme(selectedTheme);
+    document.body.classList.add('theme-transition');
+    
+    const initializeService = async () => {
+      try {
+        const newService = new TinyPngService();
+        setService(newService);
+        
+        // Test the service connection
+        const connectionResult = await newService.validateServerConnection();
+        setServiceConnected(connectionResult.success);
+        
+        if (!connectionResult.success) {
+          setServiceError(connectionResult.error || 'Unable to connect to compression service');
+        } else {
+          setServiceError(null);
+        }
+      } catch (error) {
+        console.error('Error initializing service:', error);
+        setServiceConnected(false);
+        setServiceError('Unexpected error initializing service');
+        setService(null);
+      }
+    };
+    
+    initializeService();
+  }, []);
+  
+  // Handle image upload
+  const handleFileDrop = (files: File[]) => {
+    addImages(files);
+    
+    // Reset compression results for these new images
+    setCompressionResults((prev) => 
+      prev.filter((result) => 
+        // Keep results for images that still exist in the updated images array
+        images.some((img) => img.id === result.original.id)
+      )
+    );
+  };
+  
+  // Handle image removal
+  const handleRemoveImage = (id: string) => {
+    removeImage(id);
+    
+    // Remove compression result for this image
+    setCompressionResults((prev) => 
+      prev.filter((result) => result.original.id !== id)
+    );
+  };
+  
+  // Handle compression
+  const handleCompressImages = async () => {
+    if (!service || !selectedSizeOption || !serviceConnected) return;
+    
+    setIsCompressing(true);
+    
+    // Create a copy of the current results
+    const updatedResults = [...compressionResults];
+    
+    // Process each image
+    for (const image of images) {
+      // Skip if already processed successfully
+      const existingResultIndex = updatedResults.findIndex(
+        (r) => r.original.id === image.id && r.status === CompressionStatus.SUCCESS
+      );
+      
+      if (existingResultIndex !== -1) continue;
+      
+      // Update or add result with loading status
+      const resultIndex = updatedResults.findIndex(
+        (r) => r.original.id === image.id
+      );
+      
+      const loadingResult: CompressionResult = {
+        original: image,
+        compressed: {
+          url: '',
+          originalSize: image.file.size,
+          compressedSize: 0,
+          compressionRatio: 0,
+        },
+        status: CompressionStatus.LOADING,
+      };
+      
+      if (resultIndex !== -1) {
+        updatedResults[resultIndex] = loadingResult;
+      } else {
+        updatedResults.push(loadingResult);
+      }
+      
+      setCompressionResults([...updatedResults]);
+      
+      // Process the image
+      try {
+        const result = await service.resizeToFileSize(
+          image.file,
+          selectedSizeOption.value
+        );
+        
+        // Update with success
+        const successResult: CompressionResult = {
+          original: image,
+          compressed: result,
+          status: CompressionStatus.SUCCESS,
+        };
+        
+        const finalIndex = updatedResults.findIndex(
+          (r) => r.original.id === image.id
+        );
+        
+        if (finalIndex !== -1) {
+          updatedResults[finalIndex] = successResult;
+        }
+      } catch (error) {
+        // Update with error
+        const errorResult: CompressionResult = {
+          original: image,
+          compressed: {
+            url: '',
+            originalSize: image.file.size,
+            compressedSize: 0,
+            compressionRatio: 0,
+          },
+          status: CompressionStatus.ERROR,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+        
+        const finalIndex = updatedResults.findIndex(
+          (r) => r.original.id === image.id
+        );
+        
+        if (finalIndex !== -1) {
+          updatedResults[finalIndex] = errorResult;
+        }
+      }
+      
+      // Update state after each image
+      setCompressionResults([...updatedResults]);
+    }
+    
+    setIsCompressing(false);
+  };
+  
+  // Handle clearing and compressing new images
+  const handleCompressNewImages = () => {
+    // Clear existing images and results
+    clearImages();
+    setCompressionResults([]);
+  };
+  
+  // Download all compressed images
+  const handleDownloadAll = () => {
+    compressionResults.forEach((result) => {
+      if (result.status === CompressionStatus.SUCCESS) {
+        const link = document.createElement('a');
+        link.href = result.compressed.url;
+        link.download = `compressed-${result.original.file.name}`;
+        link.click();
+      }
+    });
+  };
+  
+  // Check if any images have been successfully compressed
+  const hasCompressedImages = compressionResults.some(
+    (result) => result.status === CompressionStatus.SUCCESS
+  );
+  
+  // Get the main image to display in preview area
+  const mainPreviewImage = images.length > 0 ? images[0] : null;
+  const mainPreviewResult = mainPreviewImage ? compressionResults.find(
+    (result) => result.original.id === mainPreviewImage.id
+  ) : null;
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="min-h-screen text-dark transition-all">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <Header />
+        
+        <div className="w-full">
+          {/* Image Upload/Preview Area - At the top */}
+          <div className="mb-6">
+            {images.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <FileUploader 
+                  onDrop={handleFileDrop} 
+                  uploadedFiles={images}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Image Preview Area */}
+                <div className="p-6 relative">
+                  {mainPreviewImage && (
+                    <div className="aspect-auto max-h-[400px] flex justify-center items-center">
+                      <img 
+                        src={showCompressed && mainPreviewResult?.status === CompressionStatus.SUCCESS
+                          ? mainPreviewResult.compressed.url 
+                          : mainPreviewImage.preview}
+                        alt="Preview"
+                        className="max-h-[400px] object-contain rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Image Count Overlay */}
+                  <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100">
+                    <div className="flex items-center">
+                      <IconImage className="text-primary mr-2 w-5 h-5" />
+                      <span className="text-sm font-medium">{images.length} {images.length === 1 ? 'Image' : 'Images'}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Add More Images Button */}
+                  <div className="absolute top-4 left-4">
+                    <button
+                      className="bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100 hover:bg-primary hover:text-white transition-colors"
+                      onClick={() => document.getElementById('file-input')?.click()}
+                    >
+                      <div className="flex items-center">
+                        <IconUpload className="mr-1 w-4 h-4" />
+                        <span className="text-sm font-medium">Add Images</span>
+                      </div>
+                    </button>
+                    <input 
+                      id="file-input"
+                      type="file" 
+                      multiple 
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleFileDrop(Array.from(e.target.files));
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+          
+          {/* Conversion Parameters & Options - Always visible */}
+          <motion.div 
+            className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <div className="lg:col-span-1">
+              <CompressionOptions 
+                sizeOptions={sizeOptions}
+                selectedSizeOption={selectedSizeOption}
+                onSelectOption={setSelectedSizeOption}
+                serviceConnected={serviceConnected}
+                serviceError={serviceError}
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <ConversionParameters
+                onFormatChange={setSelectedFormat}
+                onQualityChange={setQuality}
+              />
+            </div>
+          </motion.div>
+          
+          {/* Action Strip - Horizontal controls layout */}
+          {images.length > 0 && (
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {/* Toggle View Button */}
+                  <button
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all 
+                      ${showCompressed 
+                        ? 'bg-primary/10 text-primary' 
+                        : 'bg-gray-100 text-gray-700'}`}
+                    onClick={toggleShowCompressed}
+                  >
+                    {showCompressed ? 'View Original' : 'View Compressed'}
+                  </button>
+                  
+                  {/* Compression Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    <motion.button
+                      className={`px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center
+                        ${!isCompressing 
+                          ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                          : 'bg-primary/80 text-white/90 cursor-wait'}`}
+                      whileHover={!isCompressing ? { scale: 1.02 } : {}}
+                      whileTap={!isCompressing ? { scale: 0.98 } : {}}
+                      onClick={handleCompressImages}
+                      disabled={!images.length || isCompressing}
+                    >
+                      {isCompressing ? 'Compressing...' : 'Compress Images'}
+                    </motion.button>
+                    
+                    {hasCompressedImages && (
+                      <motion.button
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium inline-flex items-center"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleDownloadAll}
+                      >
+                        <IconDownload className="mr-1 w-4 h-4" />
+                        Download All
+                      </motion.button>
+                    )}
+                    
+                    <motion.button
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={clearImages}
+                    >
+                      Clear All
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
+          {images.length > 0 && (
+            <>
+              {/* Statistics for compressed images */}
+              {hasCompressedImages && (
+                <motion.div 
+                  className="mb-6"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <CompressionStats 
+                    results={compressionResults} 
+                    onDownloadAll={handleDownloadAll}
+                    onCompressNew={handleCompressNewImages} 
+                  />
+                </motion.div>
+              )}
+
+              {/* Image Grid - Thumbnails of all images */}
+              <AnimatePresence>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {images.map((image) => (
+                    <ImagePreview
+                      key={image.id}
+                      image={image}
+                      result={compressionResults.find(
+                        (result) => result.original.id === image.id
+                      )}
+                      onRemove={handleRemoveImage}
+                      showCompressed={showCompressed}
+                    />
+                  ))}
+                </div>
+              </AnimatePresence>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

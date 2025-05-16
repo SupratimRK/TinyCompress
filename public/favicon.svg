@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#f3f4f6" />
+  
+  <!-- Image icon shape -->
+  <rect x="96" y="128" width="320" height="256" rx="24" fill="#4f46e5" />
+  
+  <!-- Mountain/image details -->
+  <polygon points="96,320 224,200 320,280 416,160 416,360 96,360" fill="#818cf8" />
+  <circle cx="160" cy="176" r="24" fill="#c7d2fe" />
+  
+  <!-- Compression arrows -->
+  <path d="M246,416 L196,366 L226,366 L226,336 L266,336 L266,366 L296,366 Z" fill="#4f46e5" />
+  <path d="M266,96 L316,146 L286,146 L286,176 L246,176 L246,146 L216,146 Z" fill="#4f46e5" />
+</svg>

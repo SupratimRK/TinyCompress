@@ -1,0 +1,16 @@
+# Netlify configuration file
+[build]
+  command = "npm run build"
+  functions = "functions"
+  publish = "build"
+
+[dev]
+  command = "npm start"
+  functions = "functions"
+  publish = "build"
+
+# Redirect API requests to our functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
