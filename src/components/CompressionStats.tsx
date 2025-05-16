@@ -96,7 +96,7 @@ const CompressionStats: React.FC<CompressionStatsProps> = ({ results, onDownload
           
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+              <div className="w-12 h-12 rounded-full  bg-gray-200/70 flex items-center justify-center mr-3">
                 <span className="text-primary text-lg">2</span>
               </div>
               <div>

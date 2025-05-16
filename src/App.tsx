@@ -12,6 +12,7 @@ import CompressionOptions from './components/CompressionOptions';
 import CompressionControls from './components/CompressionControls';
 import CompressionStats from './components/CompressionStats';
 import ConversionParameters from './components/ConversionParameters';
+import UploadInstructions from './components/UploadInstructions';
 
 // Hooks and services
 import { useImageFiles } from './hooks/useImageFiles';
@@ -279,8 +280,7 @@ function App() {
                     </div>
                   </div>
                   
-                  {/* Add More Images Button */}
-                  <div className="absolute top-4 left-4">
+                  {/* Add More Images Button */}                  <div className="absolute top-4 left-4">
                     <button
                       className="bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100 hover:bg-primary hover:text-white transition-colors"
                       onClick={() => document.getElementById('file-input')?.click()}
@@ -290,23 +290,10 @@ function App() {
                         <span className="text-sm font-medium">Add Images</span>
                       </div>
                     </button>
-                    <input 
-                      id="file-input"
-                      type="file" 
-                      multiple 
-                      accept="image/jpeg,image/png,image/webp,image/avif"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files) {
-                          handleFileDrop(Array.from(e.target.files));
-                        }
-                      }}
-                    />
                   </div>
                 </div>
               </motion.div>
-            )}
-          </div>
+            )}          </div>
           
           {/* Conversion Parameters & Options - Always visible */}
           <motion.div 
@@ -332,7 +319,18 @@ function App() {
             </div>
           </motion.div>
           
-          {/* Action Strip - Horizontal controls layout */}
+          {/* Upload Instructions & Action Controls */}
+          <UploadInstructions 
+            onUploadClick={() => document.getElementById('file-input')?.click()}
+            onCompressClick={handleCompressImages}
+            onDownloadClick={handleDownloadAll}
+            onClearClick={clearImages}
+            isCompressing={isCompressing}
+            hasImages={images.length > 0}
+            hasCompressedImages={hasCompressedImages}
+          />
+          
+          {/* Toggle View Button - Only show when images are uploaded */}
           {images.length > 0 && (
             <motion.div
               className="mb-6"
@@ -341,55 +339,15 @@ function App() {
               transition={{ duration: 0.3, delay: 0.1 }}
             >
               <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  {/* Toggle View Button */}
-                  <button
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all 
-                      ${showCompressed 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'bg-gray-100 text-gray-700'}`}
-                    onClick={toggleShowCompressed}
-                  >
-                    {showCompressed ? 'View Original' : 'View Compressed'}
-                  </button>
-                  
-                  {/* Compression Actions */}
-                  <div className="flex flex-wrap gap-2">
-                    <motion.button
-                      className={`px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center
-                        ${!isCompressing 
-                          ? 'bg-primary text-white shadow-md shadow-primary/20' 
-                          : 'bg-primary/80 text-white/90 cursor-wait'}`}
-                      whileHover={!isCompressing ? { scale: 1.02 } : {}}
-                      whileTap={!isCompressing ? { scale: 0.98 } : {}}
-                      onClick={handleCompressImages}
-                      disabled={!images.length || isCompressing}
-                    >
-                      {isCompressing ? 'Compressing...' : 'Compress Images'}
-                    </motion.button>
-                    
-                    {hasCompressedImages && (
-                      <motion.button
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium inline-flex items-center"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleDownloadAll}
-                      >
-                        <IconDownload className="mr-1 w-4 h-4" />
-                        Download All
-                      </motion.button>
-                    )}
-                    
-                    <motion.button
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={clearImages}
-                    >
-                      Clear All
-                    </motion.button>
-                  </div>
-                </div>
+                <button
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all 
+                    ${showCompressed 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'bg-gray-100 text-gray-700'}`}
+                  onClick={toggleShowCompressed}
+                >
+                  {showCompressed ? 'View Original' : 'View Compressed'}
+                </button>
               </div>
             </motion.div>
           )}

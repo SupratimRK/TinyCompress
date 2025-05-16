@@ -64,6 +64,18 @@ const FileUploader: React.FC<DropzoneProps> = ({
       } ${className}`}
     >
       <input {...getInputProps()} />
+      <input 
+        id="file-input"
+        type="file" 
+        multiple 
+        accept="image/jpeg,image/png,image/webp,image/avif"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) {
+            onDrop(Array.from(e.target.files));
+          }
+        }}
+      />
       
       {!hasFiles ? (
         <motion.div 
@@ -79,14 +91,21 @@ const FileUploader: React.FC<DropzoneProps> = ({
             damping: 10 
           }}
         >          <motion.div
-            className="w-12 h-12 mb-2"
-            whileHover={{ scale: 1.1 }}
+            className="w-24 h-24 flex items-center justify-center rounded-full bg-white border-2 border-primary/30 mb-4 relative overflow-hidden shadow-lg shadow-primary/10"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <IconUpload className="text-primary text-4xl" />
+            <div className="w-20 h-20 flex items-center justify-center rounded-full bg-primary/10 relative overflow-hidden">
+              <IconUpload className="text-primary text-4xl relative z-10" />
+              {/* Shimmer animation */}
+              <div className="absolute inset-0 z-0">
+                <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12" 
+                     style={{ backgroundSize: '200% 100%' }} />
+              </div>
+            </div>
           </motion.div>
           <div>
-            <p className="text-xl font-medium mb-2 text-gray-800">
+            <p className="text-xl font-medium mb-2 text-primary">
               {isDragActive ? 'Drop images here' : 'Click to upload images'}
             </p>
             <p className="text-sm text-gray-500 mb-1">
@@ -103,8 +122,7 @@ const FileUploader: React.FC<DropzoneProps> = ({
               <IconImage className="text-primary mr-2" />
               <h3 className="text-lg font-medium">{uploadedFiles.length} {uploadedFiles.length === 1 ? 'Image' : 'Images'} Selected</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <motion.button
+            <div className="flex items-center gap-2">              <motion.button
                 className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm flex items-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -113,7 +131,13 @@ const FileUploader: React.FC<DropzoneProps> = ({
                   open();
                 }}
               >
-                <IconUpload className="mr-1 text-sm" />
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-1.5 relative overflow-hidden">
+                  <IconUpload className="text-primary text-sm relative z-10" />
+                  <div className="absolute inset-0 z-0">
+                    <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12" 
+                         style={{ backgroundSize: '200% 100%' }} />
+                  </div>
+                </div>
                 Add More
               </motion.button>
             </div>

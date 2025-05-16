@@ -86,13 +86,7 @@ const CompressionOptions: React.FC<CompressionOptionsProps> = ({
                 {option.label}
               </motion.button>
             ))}
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-3 rounded-lg text-sm">
-          <p className="font-medium text-gray-700 mb-1">Upload image to compress</p>
-          <p className="text-gray-500 text-xs">Select your images to start the compression process</p>
-        </div>
+          </div>        </div>
       </div>
     </motion.div>
   );
