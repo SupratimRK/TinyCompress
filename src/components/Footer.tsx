@@ -20,15 +20,16 @@ const Footer: React.FC = () => {
             </p>
           </div>
           
-          <div className="flex flex-col items-center md:items-end">
+            <div className="flex flex-col items-center md:items-end">
             <div className="flex items-center mb-2">
-              <p className="text-sm text-gray-500 mr-2">Crafted with</p>
-              <IconHeart className="text-red-500 w-4 h-4" />
+              <p className="text-sm text-gray-500 mr-2 flex items-center">
+              Crafted with <IconHeart className="text-rose-500 w-4 h-4 mx-1" /> in India
+              </p>
             </div>
             <p className="text-xs text-gray-400">
               &copy; {currentYear} TinyCompress. All rights reserved.
             </p>
-          </div>
+            </div>
         </div>
       </div>
     </motion.footer>
