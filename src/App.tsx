@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { IconInfo, IconHeart, IconImage, IconUpload, IconDownload } from './react-icons-fix';
+import { IconInfo, IconHeart, IconImage, IconUpload, IconDownload, IconX } from './react-icons-fix';
 import { getRandomTheme, applyTheme } from './utils/theme';
 import './App.css';
 
@@ -37,6 +37,9 @@ function App() {
   const [serviceConnected, setServiceConnected] = useState<boolean>(false);
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [service, setService] = useState<TinyPngService | null>(null);
+  
+  // Reference for FileUploader section
+  const fileUploaderRef = useRef<HTMLDivElement>(null);
   
   // State for compression options
   const [selectedSizeOption, setSelectedSizeOption] = useState<SizeOption | null>(
@@ -213,6 +216,27 @@ function App() {
       }
     });
   };
+    // Function to scroll to FileUploader section
+  const scrollToFileUploader = () => {
+    if (fileUploaderRef.current) {
+      fileUploaderRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+      
+      // Only trigger file input if we don't have images already
+      if (images.length === 0) {
+        // Use a single timeout to prevent double triggering
+        setTimeout(() => {
+          const fileInput = document.getElementById('file-input') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+            fileInput.click();
+          }
+        }, 500);
+      }
+    }
+  };
   
   // Check if any images have been successfully compressed
   const hasCompressedImages = compressionResults.some(
@@ -233,58 +257,67 @@ function App() {
         <div className="w-full">
           {/* Image Upload/Preview Area - At the top */}
           <div className="mb-6">
-            {images.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <FileUploader 
-                  onDrop={handleFileDrop} 
-                  uploadedFiles={images}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* Image Preview Area */}
-                <div className="p-6 relative">
-                  {mainPreviewImage && (
-                    <div className="aspect-auto max-h-[400px] flex justify-center items-center">                      <img 
-                        src={mainPreviewResult?.status === CompressionStatus.SUCCESS
-                          ? mainPreviewResult.compressed.url 
-                          : mainPreviewImage.preview}
-                        alt="Preview"
-                        className="max-h-[400px] object-contain rounded-lg"
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Image Count Overlay */}                  <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100">
-                    <div className="flex items-center">
-                      <IconImage className="text-primary mr-2 w-5 h-5" />
-                      <span className="text-sm font-medium">Image Ready</span>
-                    </div>
-                  </div>
-                  
-                  {/* Add More Images Button */}                  <div className="absolute top-4 left-4">
-                    <button
-                      className="bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100 hover:bg-primary hover:text-white transition-colors"
-                      onClick={() => document.getElementById('file-input')?.click()}
-                    >
-                      <div className="flex items-center">
-                        <IconUpload className="mr-1 w-4 h-4" />
-                        <span className="text-sm font-medium">Add Images</span>
+            <div ref={fileUploaderRef}>
+              {images.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <FileUploader 
+                    onDrop={handleFileDrop} 
+                    uploadedFiles={images}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Image Preview Area */}
+                  <div className="p-6 relative">
+                    {mainPreviewImage && (
+                      <div className="aspect-auto max-h-[400px] flex justify-center items-center">
+                        <img 
+                          src={mainPreviewResult?.status === CompressionStatus.SUCCESS
+                            ? mainPreviewResult.compressed.url 
+                            : mainPreviewImage.preview}
+                          alt="Preview"
+                          className="max-h-[400px] object-contain rounded-lg"
+                        />
                       </div>
-                    </button>
+                    )}
+                    
+                    {/* Image Count Overlay */}
+                    <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100">
+                      <div className="flex items-center">
+                        <IconImage className="text-primary mr-2 w-5 h-5" />
+                        <span className="text-sm font-medium">Image Ready</span>
+                      </div>
+                    </div>
+                    {/* Clear Image Button */}
+                    <div className="absolute top-4 left-4">
+                      <button
+                        className="bg-white/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm border border-gray-100 hover:bg-gray-200 transition-colors"
+                        onClick={() => {
+                          // Clear existing images
+                          clearImages();
+                          setCompressionResults([]);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <IconX className="mr-1 w-4 h-4" />
+                          <span className="text-sm font-medium">Clear Image</span>
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            )}          </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
           
           {/* Conversion Parameters & Options - Always visible */}
           <motion.div 
@@ -308,14 +341,26 @@ function App() {
                 onQualityChange={setQuality}
               />
             </div>
-          </motion.div>
-          
-          {/* Upload Instructions & Action Controls */}
-          <UploadInstructions 
-            onUploadClick={() => document.getElementById('file-input')?.click()}
+          </motion.div>            {/* Upload Instructions & Action Controls */}          <UploadInstructions 
+            onUploadClick={() => {
+              // Use the scroll function to move users to the FileUploader section
+              scrollToFileUploader();
+            }}
             onCompressClick={handleCompressImages}
             onDownloadClick={handleDownloadAll}
-            onClearClick={clearImages}
+            onClearClick={() => {
+              // Clear the images and scroll to upload area
+              clearImages();
+              setCompressionResults([]);
+              
+              // Scroll to the file uploader area but don't trigger file picker
+              if (fileUploaderRef.current) {
+                fileUploaderRef.current.scrollIntoView({ 
+                  behavior: 'smooth',
+                  block: 'center'
+                });
+              }
+            }}
             isCompressing={isCompressing}
             hasImages={images.length > 0}
             hasCompressedImages={hasCompressedImages}
@@ -356,7 +401,7 @@ function App() {
               </AnimatePresence>
             </>          )}
         </div>      </div>
-      <div className="border-t border-gray-100 mt-10"></div>
+      <div className="border-t border-gray-200 mt-10 mb-5 shadow-sm"></div>
       <Footer />
     </div>
   );

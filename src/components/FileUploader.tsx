@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDropzone, Accept } from 'react-dropzone';
 import { motion } from 'framer-motion';
 // Import our fixed icon components
-import { IconUpload, IconImage } from '../react-icons-fix'; 
+import { IconUpload, IconImage, IconX } from '../react-icons-fix'; 
 import { ImageFile } from '../hooks/useImageFiles';
 
 interface DropzoneProps {
@@ -67,14 +67,20 @@ const FileUploader: React.FC<DropzoneProps> = ({
       <input {...getInputProps()} />      <input 
         id="file-input"
         type="file" 
-        multiple 
+        multiple={false} 
         accept="image/jpeg,image/png,image/webp,image/avif"
         className="hidden"
         onChange={(e) => {
-          if (e.target.files) {
+          if (e.target.files && e.target.files.length > 0) {
+            // Process the files
             onDrop(Array.from(e.target.files));
-            // Reset the file input value to allow selecting the same file again
-            e.target.value = '';
+            
+            // Use a timeout to reset the value to prevent double-firing
+            setTimeout(() => {
+              if (e.target) {
+                e.target.value = '';
+              }
+            }, 100);
           }
         }}
       />
@@ -126,22 +132,21 @@ const FileUploader: React.FC<DropzoneProps> = ({
               <h3 className="text-lg font-medium">{uploadedFiles.length} {uploadedFiles.length === 1 ? 'Image' : 'Images'} Selected</h3>
             </div>
             <div className="flex items-center gap-2">              <motion.button
-                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm flex items-center shadow-sm"
-                whileHover={{ scale: 1.05 }}
+                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm flex items-center shadow-sm"                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  open();
+                  // Pass an empty array to clear the existing image
+                  onDrop([]);
                 }}
-              >
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-1.5 relative overflow-hidden">
-                  <IconUpload className="text-white text-sm relative z-10" />
+              >                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-1.5 relative overflow-hidden">
+                  <IconX className="text-gray-700 text-sm relative z-10" />
                   <div className="absolute inset-0 z-0">
-                    <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12" 
+                    <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-gray-400/30 to-transparent -skew-x-12" 
                          style={{ backgroundSize: '200% 100%' }} />
                   </div>
                 </div>
-                Add More
+                Clear Image
               </motion.button>
             </div>
           </div>

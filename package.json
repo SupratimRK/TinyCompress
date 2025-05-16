@@ -3,27 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.126",
+    "@types/node": "^18.0.0",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "autoprefixer": "^10.4.21",
     "axios": "^1.9.0",
     "framer-motion": "^12.12.1",
+    "lucide-react": "^0.511.0",
     "postcss": "^8.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
-    "react-icons": "^5.5.0",
-    "react-scripts": "5.0.1",
     "tailwindcss": "^3.4.17",
     "tinify": "^1.8.0",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "start": "vite",
@@ -38,7 +31,8 @@
     "setup:env": "powershell -ExecutionPolicy Bypass -File setup-netlify-env.ps1",
     "screenshot": "node take-screenshot.js",
     "deploy": "netlify deploy --prod",
-    "deploy:preview": "netlify deploy"
+    "deploy:preview": "netlify deploy",
+    "prepare-production": "npm run cleanup && npm run build"
   },
   "eslintConfig": {
     "extends": [
@@ -59,6 +53,11 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
     "@vitejs/plugin-react": "^4.4.1",
     "buffer-browserify": "^0.2.5",
     "concurrently": "^9.1.2",
@@ -66,11 +65,12 @@
     "https-browserify": "^1.0.0",
     "netlify-cli": "^21.4.2",
     "netlify-lambda": "^2.0.16",
-    "puppeteer": "^21.5.0",
+    "react-scripts": "5.0.1",
     "stream-http": "^3.2.0",
     "url": "^0.11.4",
     "vite": "^6.3.5",
     "vite-plugin-svgr": "^4.3.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "web-vitals": "^2.1.4"
   }
 }
