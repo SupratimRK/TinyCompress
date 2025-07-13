@@ -2,7 +2,8 @@
 
 A powerful image compression web application powered by the TinyPNG API. This application provides a beautiful UI built with React, TypeScript, Tailwind CSS, and Framer Motion animations. It allows users to compress images to specific target file sizes with just a few clicks.
 
-![TinyCompressor Screenshot](screenshot.png)
+<img width="1910" height="1406" alt="image" src="https://github.com/user-attachments/assets/71c9283b-f4e5-45be-bca8-c7d57a4ae958" />
+
 
 ## Features
 
