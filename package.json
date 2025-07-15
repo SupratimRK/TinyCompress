@@ -1,5 +1,7 @@
 {
   "name": "resize-app",
+  "description": "TinyCompress is a web app for fast image compression and resizing, built with React and Vite.",
+  "keywords": ["image compression", "image resizing", "react", "vite", "tinypng", "web app"],
   "version": "0.1.0",
   "private": true,
   "dependencies": {
