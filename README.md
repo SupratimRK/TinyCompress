@@ -2,8 +2,38 @@
 
 A powerful image compression web application powered by the TinyPNG API. This application provides a beautiful UI built with React, TypeScript, Tailwind CSS, and Framer Motion animations. It allows users to compress images to specific target file sizes with just a few clicks.
 
+## 🆕 Next.js Version with Sharp
+
+We now have a **Next.js version** that uses the Sharp image library for local processing instead of TinyPNG API:
+
+- **📂 Location**: [`/nextjs-version`](./nextjs-version/) directory
+- **🚀 Local Processing**: No external API dependencies
+- **⚡ Sharp Library**: High-performance image compression
+- **🎯 Same Features**: All the compression options you love
+- **🔒 Privacy**: Images stay on your server
+
+[**📖 View Next.js Version Documentation →**](./nextjs-version/README.md)
+
+---
+
 <img width="1910" height="1406" alt="image" src="https://github.com/user-attachments/assets/71c9283b-f4e5-45be-bca8-c7d57a4ae958" />
 
+
+## 🔄 Two Versions Available
+
+| Feature | Original (TinyPNG) | [Next.js (Sharp)](./nextjs-version/) |
+|---------|-------------------|-----------------|
+| **Processing** | External TinyPNG API | Local Sharp library |
+| **Setup** | Requires API key | No API key needed |
+| **Rate Limits** | 500/month (free tier) | Unlimited |
+| **Dependencies** | TinyPNG service | Self-contained |
+| **Privacy** | Images sent to TinyPNG | Images stay local |
+| **Offline** | Requires internet | Works offline |
+| **Framework** | React + Vite + Netlify | Next.js App Router |
+
+**🎯 Choose the version that fits your needs:**
+- **TinyPNG Version**: Maximum compression quality, easy deployment
+- **Next.js Version**: Complete privacy, no limits, local processing
 
 ## Features
 
